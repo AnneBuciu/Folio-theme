@@ -1,0 +1,51 @@
+version: '3.8'
+
+# Services
+services:
+  # Datenbankserver mit MySQL 8.0
+  db:
+    image: mysql:8.0
+    platform: linux/amd64   # für die x86_64-Architektur
+    environment:
+      MYSQL_ROOT_PASSWORD: example_root_password
+      MYSQL_DATABASE: example_db
+      MYSQL_USER: example_user
+      MYSQL_PASSWORD: example_password
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # Aktuelle WordPress Version
+  wordpress:
+    image: wordpress:latest
+    platform: linux/amd64   # für die x86_64-Architektur
+    ports:
+      - "8080:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: example_user
+      WORDPRESS_DB_PASSWORD: example_password
+      WORDPRESS_DB_NAME: example_db
+    volumes:
+      - ./data/wordpress:/var/www/html
+      - ./folio-theme:/var/www/html/wp-content/themes/folio-theme
+
+  # phpMyAdmin – haben wir installiert, da es die meisten Hostingprovider zur Verfügung stellen und wir es zum Üben bzw. Zeigen nutzen
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    platform: linux/amd64   # für die x86_64-Architektur
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: example_root_password
+    ports:
+      - "8181:80"
+
+  # MailHog: damit können wir von localhost gesendete Emails testen – also von WP gesendet
+  mailhog:
+    image: mailhog/mailhog
+    platform: linux/amd64   # für die x86_64-Architektur
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
+volumes:
+  db_data:
